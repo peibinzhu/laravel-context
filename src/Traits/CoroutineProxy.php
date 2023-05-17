@@ -1,0 +1,37 @@
+<?php
+
+declare(strict_types=1);
+
+namespace PeibinLaravel\Context\Traits;
+
+use PeibinLaravel\Context\Context;
+use RuntimeException;
+
+trait CoroutineProxy
+{
+    public function __call($name, $arguments)
+    {
+        $target = $this->getTargetObject();
+        return $target->{$name}(...$arguments);
+    }
+
+    public function __get($name)
+    {
+        $target = $this->getTargetObject();
+        return $target->{$name};
+    }
+
+    public function __set($name, $value)
+    {
+        $target = $this->getTargetObject();
+        return $target->{$name} = $value;
+    }
+
+    protected function getTargetObject()
+    {
+        if (!isset($this->proxyKey)) {
+            throw new RuntimeException(sprintf('Missing $proxyKey property in %s.', $this::class));
+        }
+        return Context::get($this->proxyKey);
+    }
+}
